@@ -17,9 +17,8 @@ import modelo.vo.Usuario;
 public class controladorListados {
 
     // ------------------------------------------------------------------------
-    // LISTADO 1: Pilotos (SODA) cuyas horasVuelo > param1, militar == param2,
-    //            y cuyo Avion pertenezca a userActual.
-    //            Luego, muestra la Suma total de horas de vuelo.
+    // LISTADO 1: Pilotos (SODA) con horasVuelo superiores a, militar  boolean,
+    //             muestra la Suma total de horas de vuelo.
     // ------------------------------------------------------------------------
     private static List<Piloto> obtenerPilotosHorasMilitar_SODA(
             int horasMin, boolean esMilitar, Usuario userActual, AtomicInteger sumaHoras) {
@@ -80,7 +79,7 @@ public class controladorListados {
 
         } catch (NumberFormatException nfe) {
             JOptionPane.showMessageDialog(null,
-                    "El primer parametro (horasMin) debe ser un número.",
+                    "El primer parametro (horasMin) debe ser un numero.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
@@ -93,18 +92,17 @@ public class controladorListados {
     }
 
     // ------------------------------------------------------------------------
-    // LISTADO 2: Aviones (NQ) con num_pasajeros > param1 y destino == param2,
-    //            que pertenecen al userActual.
-    //            Luego, muestra el Promedio de pasajeros de esos aviones.
+    // LISTADO 2: Aviones (NQ) con num_pasajeros superior a y destino = a
+    //            Muestra el Promedio de pasajeros de esos aviones.
     // ------------------------------------------------------------------------
     private static List<Avion> obtenerAvionesPasajerosDestino_NQ(
-            int pasajerosMin, String destinoParam, Usuario userActual, AtomicInteger promedio) {
+            int pasajerosMin, String destino, Usuario userActual, AtomicInteger promedio) {
         List<Avion> lista = controladorFactory.getBD().query(new Predicate<Avion>() {
             @Override
             public boolean match(Avion av) {
                 return av.getUsuario().equals(userActual)
                         && av.getNum_pasajeros() > pasajerosMin
-                        && av.getDestino().equalsIgnoreCase(destinoParam);
+                        && av.getDestino().equalsIgnoreCase(destino);
             }
         });
 
@@ -132,10 +130,10 @@ public class controladorListados {
                 return;
             }
             int pasajerosMin = Integer.parseInt(param1);
-            String destinoParam = param2;
+            String destino = param2;
 
             AtomicInteger promedio = new AtomicInteger(0);
-            List<Avion> lista = obtenerAvionesPasajerosDestino_NQ(pasajerosMin, destinoParam, userActual, promedio);
+            List<Avion> lista = obtenerAvionesPasajerosDestino_NQ(pasajerosMin, destino, userActual, promedio);
 
             cargarTablaAviones(lista, tablaListados);
 
@@ -159,17 +157,16 @@ public class controladorListados {
     }
 
     // ------------------------------------------------------------------------
-    // LISTADO 3: Pilotos (SODA) con nacionalidad = param1 y psicologo == param2,
-    //            y cuyo Avion pertenece al userActual.
+    // LISTADO 3: Pilotos (SODA) con nacionalidad = a y va alpsicologo 
     //            Luego, muestra el total de hijos de esos pilotos.
     // ------------------------------------------------------------------------
     private static List<Piloto> obtenerPilotosNacionalidadPsicologo_SODA(
-            String nacionalidad, boolean esPsicologo, Usuario userActual, AtomicInteger totalHijos) {
+            String nacionalidad, boolean vaPsicologo, Usuario userActual, AtomicInteger totalHijos) {
         Query q = controladorFactory.getBD().query();
         q.constrain(Piloto.class);
 
         q.descend("nacionalidad").constrain(nacionalidad);
-        q.descend("psicologo").constrain(esPsicologo);
+        q.descend("psicologo").constrain(vaPsicologo);
 
         q.descend("avion").descend("usuario").constrain(userActual);
 
@@ -195,11 +192,11 @@ public class controladorListados {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            boolean esPsicologo;
+            boolean vaPsicologo;
             if (param2.equalsIgnoreCase("true")) {
-                esPsicologo = true;
+                vaPsicologo = true;
             } else if (param2.equalsIgnoreCase("false")) {
-                esPsicologo = false;
+               vaPsicologo = false;
             } else {
                 JOptionPane.showMessageDialog(null,
                         "El segundo parámetro debe ser 'true' o 'false' (psicologo).",
@@ -210,7 +207,7 @@ public class controladorListados {
 
             AtomicInteger totalHijos = new AtomicInteger(0);
             List<Piloto> lista = obtenerPilotosNacionalidadPsicologo_SODA(
-                    param1, esPsicologo, userActual, totalHijos);
+                    param1, vaPsicologo, userActual, totalHijos);
 
             cargarTablaPilotos(lista, tablaListados);
 
@@ -228,9 +225,6 @@ public class controladorListados {
         }
     }
 
-    // ------------------------------------------------------------------------
-    // Métodos de utilidad para cargar datos en la tabla de la interfaz
-    // ------------------------------------------------------------------------
     private static void cargarTablaPilotos(List<Piloto> lista, JTable tablaListados) {
         String[] columnas = {"DNI", "Nombre", "Apellido", "Nacionalidad", "Hijos", "Psicologo"};
 
